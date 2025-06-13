@@ -41,6 +41,14 @@ INSTALLED_APPS = [
     'chat',
 ]
 
+ASGI_APPLICATION = 'chatproject.asgi.application'
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    },
+}
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -68,6 +76,7 @@ TEMPLATES = [
     },
 ]
 
+
 WSGI_APPLICATION = 'chatproject.wsgi.application'
 
 
@@ -76,10 +85,20 @@ WSGI_APPLICATION = 'chatproject.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'chatproject_db',
+        'USER': 'postgres',
+        'PASSWORD': 'Admin',
+        'HOST': 'localhost', 
+        'PORT': '5432',
     }
 }
+
+# DB_NAME=ecommerce_db
+# DB_USER=postgres
+# DB_PASSWORD=Admin
+# DB_HOST=localhost
+# DB_PORT=5432
 
 
 # Password validation
@@ -122,11 +141,3 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-ASGI_APPLICATION = 'chatproject.asgi.application'
-
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer',
-    }
-}

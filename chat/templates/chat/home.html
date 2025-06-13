@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Join Chat Room</title>
+</head>
+<body>
+    <h2>Enter a Room Name to Join</h2>
+    <form action="{% url 'join_room' %}" method="POST">
+        {% csrf_token %}
+         <input type="text" name="username" required placeholder="Enter your name">
+        <input type="text" name="room_name" required placeholder="Enter room name">
+        <button type="submit">Join Room</button>
+    </form>
+
+</body>
+</html>
