@@ -39,7 +39,6 @@
         #online-users, #offline-users {
             list-style: none;
             padding-left: 0;
-            margin-bottom: 15px;
         }
         #online-users li, #offline-users li {
             margin-bottom: 5px;
@@ -49,15 +48,15 @@
 <body class="bg-light">
 <div class="container mt-5">
     <div class="row">
-        <!-- Chat Area -->
+        <!-- Chat Box -->
         <div class="col-md-8">
             <div class="card shadow rounded">
                 <div class="card-header bg-primary text-white">
                     <h4 class="mb-0">Chat Room: {{ room_name }}</h4>
                     <small>Username: {{ username }}</small>
                 </div>
-                <div class="card-body d-flex flex-column" id="chat-log">
-                    <!-- Messages will appear here -->
+                <div class="card-body" id="chat-log">
+                    <!-- Messages will be shown here -->
                 </div>
                 <div class="card-footer">
                     <div class="input-group">
@@ -69,9 +68,9 @@
             </div>
         </div>
 
-        <!-- Users Area -->
+        <!-- Online/Offline Users -->
         <div class="col-md-4">
-            <div class="card shadow rounded mb-4">
+            <div class="card shadow rounded mb-3">
                 <div class="card-header bg-success text-white">
                     <h5 class="mb-0">Online Users</h5>
                 </div>
@@ -92,39 +91,39 @@
     </div>
 </div>
 
+<!-- JavaScript Logic -->
 <script>
     const roomName = "{{ room_name }}";
     const username = "{{ username }}";
 
-    const onlineUsers = new Set();
-
+    // WebSocket connection
     const chatSocket = new WebSocket(
-        'ws://' + window.location.host +
-        '/ws/chat/' + roomName + '/?username=' + encodeURIComponent(username)
+        'ws://' + window.location.host + '/ws/chat/' + roomName + '/?username=' + encodeURIComponent(username)
     );
 
+    // When WebSocket is connected
     chatSocket.onopen = function () {
-        console.log("✅ Connected to WebSocket");
+        console.log("✅ Connected to chat server");
     };
 
+    // When WebSocket receives message
     chatSocket.onmessage = function (e) {
         const data = JSON.parse(e.data);
         const chatLog = document.getElementById('chat-log');
 
         if (data.type === 'chat_message') {
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('message');
+            const msgDiv = document.createElement('div');
+            msgDiv.classList.add('message');
 
-            const isUser = data.username === username;
-            messageDiv.classList.add(isUser ? 'right' : 'left');
+            const isMine = data.username === username;
+            msgDiv.classList.add(isMine ? 'right' : 'left');
 
-            messageDiv.innerHTML = `
+            msgDiv.innerHTML = `
                 <strong>${data.username}</strong><br>
                 ${data.message}
                 <div class="timestamp">${data.timestamp}</div>
             `;
-
-            chatLog.appendChild(messageDiv);
+            chatLog.appendChild(msgDiv);
             chatLog.scrollTop = chatLog.scrollHeight;
 
         } else if (data.type === 'online_users_update') {
@@ -132,43 +131,43 @@
         }
     };
 
+    // Update user lists (online and offline)
     function updateUserLists(onlineList, offlineDict) {
-        const onlineUsersDiv = document.getElementById('online-users');
-        const offlineUsersDiv = document.getElementById('offline-users');
+        const onlineDiv = document.getElementById('online-users');
+        const offlineDiv = document.getElementById('offline-users');
 
-        // Clear old data
-        onlineUsersDiv.innerHTML = '';
-        offlineUsersDiv.innerHTML = '';
+        onlineDiv.innerHTML = '';
+        offlineDiv.innerHTML = '';
 
-        // Update online
         onlineList.forEach(user => {
             const li = document.createElement('li');
             li.textContent = user;
-            onlineUsersDiv.appendChild(li);
+            onlineDiv.appendChild(li);
         });
 
-        // Update offline
         for (const [user, lastSeen] of Object.entries(offlineDict)) {
             const li = document.createElement('li');
             li.textContent = `${user} (last seen: ${lastSeen})`;
-            offlineUsersDiv.appendChild(li);
+            offlineDiv.appendChild(li);
         }
     }
 
+    // Send message
     document.getElementById('chat-message-submit').onclick = function () {
         const input = document.getElementById('chat-message-input');
-        const message = input.value.trim();
-        if (message) {
+        const msg = input.value.trim();
+        if (msg) {
             chatSocket.send(JSON.stringify({
                 'type': 'chat_message',
-                'message': message
+                'message': msg
             }));
             input.value = '';
         }
     };
 
-    document.getElementById('chat-message-input').addEventListener('keyup', function (event) {
-        if (event.key === 'Enter') {
+    // Press Enter to send
+    document.getElementById('chat-message-input').addEventListener('keyup', function (e) {
+        if (e.key === 'Enter') {
             document.getElementById('chat-message-submit').click();
         }
     });
